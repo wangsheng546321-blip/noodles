@@ -1,4 +1,4 @@
-name: Deploy GlobalPulse Dashboard
+name: Publish GlobalPulse Dashboard
 
 on:
   push:
@@ -10,32 +10,34 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
-  group: github-pages
+  group: publish-gh-pages
   cancel-in-progress: false
 
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  publish:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload static site
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: output/globalpulse-dashboard
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Publish static site to gh-pages
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/globalpulse-pages
+          mkdir -p /tmp/globalpulse-pages
+          cp -R output/globalpulse-dashboard/. /tmp/globalpulse-pages/
+          cd /tmp/globalpulse-pages
+          git init
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b gh-pages
+          git add .
+          git commit -m "Deploy GlobalPulse Dashboard"
+          git remote add origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git push --force origin gh-pages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
