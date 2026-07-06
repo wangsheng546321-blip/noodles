@@ -1,0 +1,11 @@
+tmp/
+.agents/
+o3de/
+skills-lock.json
+*.docx
+*旅游计划书.md
+output/*.zip
+output/*.rar
+output/*.md
+output/pdf/
+output/interior_design/
